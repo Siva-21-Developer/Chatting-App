@@ -1,12 +1,71 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class SignupPage extends StatelessWidget {
+import 'Home.dart';
+
+class SignupPage extends StatefulWidget {
+  @override
+  State<SignupPage> createState() => _SignupPageState();
+}
+
+class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
 
+    var kBackgroundColor = Colors.black;
+
+    var error_text ;
+
+    TextEditingController UserName = TextEditingController();
+    TextEditingController PhoneNumber = TextEditingController();
     TextEditingController Email = TextEditingController();
+    TextEditingController Password = TextEditingController();
+    TextEditingController confirmPassword = TextEditingController();
+
+    Future<User?> register()
+    async{
+      final user = FirebaseAuth.instance.currentUser!;
+      final userData = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final String name =userData.data()!['UserName'].toString();
+
+      try{
+
+        if(Password.text == confirmPassword.text)
+          {
+              UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: Email.text, password: Password.text);
+              //return userCredential.user;
+
+              FirebaseFirestore.instance.collection("users").doc(userCredential.user!.uid).set({
+                'UserName': UserName.text,
+                'Phone' : PhoneNumber.text
+              });
+              if (userCredential.user != null) {
+                Navigator.pushAndRemoveUntil(
+                    context, MaterialPageRoute(builder: (context) => Home(name: name,)), (
+                    route) => false);
+              }
+          }
+        else
+          {
+            ScaffoldMessenger.of(context).clearSnackBars();
+            ScaffoldMessenger.of(context)
+                .showSnackBar(const SnackBar(content: Text('Password is mismatch')));
+          }
+      }
+      on FirebaseAuthException catch(error)
+      {
+        if (error == 'email-already-in-use') {}
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(error.message ?? '')));
+      }
+      return null;
+    }
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -44,9 +103,11 @@ class SignupPage extends StatelessWidget {
               ),
               Column(
                 children: <Widget>[
-                  FadeInUp(duration: const Duration(milliseconds: 1200), child: makeInput(label: "Email", controllers:Email)),
-                  FadeInUp(duration: const Duration(milliseconds: 1300), child: makeInput(label: "Password", obscureText: true)),
-                  FadeInUp(duration: const Duration(milliseconds: 1400), child: makeInput(label: "Confirm Password", obscureText: true)),
+                  FadeInUp(duration: const Duration(milliseconds: 1200), child: makeInput(label: "User Name", controllers:UserName, Color_s: kBackgroundColor, error_text: error_text)),
+                  FadeInUp(duration: const Duration(milliseconds: 1200), child: makeInput(label: "Phone", controllers:PhoneNumber, Color_s: kBackgroundColor, error_text: error_text)),
+                  FadeInUp(duration: const Duration(milliseconds: 1200), child: makeInput(label: "Email", controllers:Email, Color_s: kBackgroundColor, error_text: error_text)),
+                  FadeInUp(duration: const Duration(milliseconds: 1300), child: makeInput(label: "Password", obscureText: true, controllers: Password,Color_s: kBackgroundColor, error_text: error_text)),
+                  FadeInUp(duration: const Duration(milliseconds: 1400), child: makeInput(label: "Confirm Password", obscureText: true, controllers: confirmPassword,Color_s: kBackgroundColor, error_text: error_text)),
                 ],
               ),
               FadeInUp(duration: const Duration(milliseconds: 1500), child: Container(
@@ -63,9 +124,7 @@ class SignupPage extends StatelessWidget {
                 child: MaterialButton(
                   minWidth: double.infinity,
                   height: 60,
-                  onPressed: () {
-                    print(Email.text);
-                  },
+                  onPressed: register,
                   color: Colors.greenAccent,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -93,7 +152,7 @@ class SignupPage extends StatelessWidget {
     );
   }
 
-  Widget makeInput({label, obscureText = false, controllers}) {
+  Widget makeInput({label, obscureText = false, controllers, Color_s, error_text}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -104,15 +163,17 @@ class SignupPage extends StatelessWidget {
         ),),
         const SizedBox(height: 5,),
         TextField(
+
           obscureText: obscureText,
           controller: controllers,
           decoration: InputDecoration(
+            errorText: error_text,
             contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
             enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey.shade400)
+                borderSide: BorderSide(color: Color_s)
             ),
             border: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey.shade400)
+                borderSide: BorderSide(color:Color_s)
             ),
           ),
         ),
