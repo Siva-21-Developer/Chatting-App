@@ -1,11 +1,15 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:chatapp/Home.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 
 class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
+
+  Future<bool> login() => Future.delayed(const Duration(seconds: 2), () => true);
+
+
   @override
   Widget build(BuildContext context) {
 
@@ -15,36 +19,45 @@ class LoginPage extends StatelessWidget {
 
     Future<User?> Login()
     async {
-      final user = FirebaseAuth.instance.currentUser!;
-      final userData = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      final String name =userData.data()!['UserName'].toString();
       if(Password.text.isNotEmpty || Email.text.isNotEmpty)
         {
           try
           {
-            if(!Password.text.isEmpty || !Email.text.isEmpty)
+            if(Password.text.isNotEmpty || Email.text.isNotEmpty)
             {
               UserCredential userCredential = await FirebaseAuth.instance
                   .signInWithEmailAndPassword(
                   email: Email.text, password: Password.text);
-              // return userCredential.user;
-              if (userCredential.user != null) {
-                Navigator.pushAndRemoveUntil(
-                    context, MaterialPageRoute(builder: (context) => Home(name: name,)), (
-                    route) => false);
+              if (userCredential.user != null)
+              {
+                // Navigator.pushAndRemoveUntil(
+                //     context, MaterialPageRoute(builder: (context) => Home()), (
+                //     route) => false);
+
+                if (await login()) {
+                  if (context.mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Home(),
+                      ),
+                    );
+                  }
+                }
+
               }
 
             }
           }
           on FirebaseAuthException catch(error)
           {
-            ScaffoldMessenger.of(context).clearSnackBars();
-            ScaffoldMessenger.of(context)
+            if(context.mounted)
+              {
+                ScaffoldMessenger.of(context).clearSnackBars();
+                ScaffoldMessenger.of(context)
                 .showSnackBar(SnackBar(content: Text(error.message ?? '')));
-          }
+              }
+           }
 
         }
       else
@@ -54,6 +67,7 @@ class LoginPage extends StatelessWidget {
               .showSnackBar(const SnackBar(content: Text('Please Enter the value')));
 
         }
+      return null;
 
     }
     return Scaffold(
@@ -69,7 +83,7 @@ class LoginPage extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios, size: 20, color: Colors.black,),
         ),
       ),
-      body: Container(
+      body: SizedBox(
         height: MediaQuery.of(context).size.height,
         width: double.infinity,
         child: Column(
@@ -150,7 +164,8 @@ class LoginPage extends StatelessWidget {
                       fit: BoxFit.cover
                   )
               ),
-            ))
+            ),
+            ),
           ],
         ),
       ),

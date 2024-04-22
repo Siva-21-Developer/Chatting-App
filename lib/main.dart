@@ -16,23 +16,31 @@ void main() async{
   FirebaseFirestore.instance.settings =  const Settings(
     persistenceEnabled: true,
   );
-  final user = FirebaseAuth.instance.currentUser!;
-  final userData = await FirebaseFirestore.instance
-      .collection('users')
-      .doc(user.uid)
-      .get();
-  final String name =userData.data()!['UserName'].toString();
+
 
   runApp(
       MaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          inputDecorationTheme: const InputDecorationTheme(
+            labelStyle: TextStyle(
+              color: Colors.blue,
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                style: BorderStyle.solid,
+                color: Colors.blue,
+              ),
+            ),
+          ),
+        ),
         home: StreamBuilder(stream: FirebaseAuth.instance.authStateChanges(), builder: (BuildContext context, snapshot)
         {
           if(snapshot.hasData)
             {
-              return  Home(name: name,);
+              return  const Home();
             }
-          return HomePage();
+          return const HomePage();
         },),
       )
   );
@@ -43,7 +51,10 @@ void main() async{
 
 
 class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
   @override
+
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
@@ -84,7 +95,7 @@ class HomePage extends StatelessWidget {
                     minWidth: double.infinity,
                     height: 60,
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
                     },
                     shape: RoundedRectangleBorder(
                         side: const BorderSide(
@@ -113,7 +124,7 @@ class HomePage extends StatelessWidget {
                       minWidth: double.infinity,
                       height: 60,
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => SignupPage()));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const SignupPage()));
                       },
                       color: Colors.yellow,
                       elevation: 0,

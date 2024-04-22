@@ -38,6 +38,7 @@ class _NewMessageState extends State<NewMessage> {
       'createdAt': Timestamp.now(),
       'userId': user.uid,
       'username': userData.data()!['UserName'],
+      'userImage': userData.data()!['ImgUrl'],
     });
   }
 
@@ -53,27 +54,27 @@ class _NewMessageState extends State<NewMessage> {
         children: [
           Expanded(
             child: TextField(
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.black),
               controller: _messageController,
-              cursorColor: Colors.white,
+              cursorColor: Colors.black,
               textCapitalization: TextCapitalization.sentences,
               autocorrect: true,
               enableSuggestions: true,
               decoration:
                InputDecoration(
                  labelText: "send a message....",
-                fillColor: Colors.white,
+                fillColor: Colors.black,
                 contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
                 enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey.shade400)
+                    borderSide: BorderSide(color: Colors.blue.shade400,width: 2.0)
                 ),
                 border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey.shade400)
+                    borderSide: BorderSide(color: Colors.blue.shade400, width: 2.0)
                 ),
               ),
             ),
           ),
-          IconButton(onPressed: _SubmitMessage, icon: const Icon(Icons.send, color: Colors.white,))
+          IconButton(onPressed: _SubmitMessage, icon: const Icon(Icons.send, color: Colors.blue,))
         ],
       ),
     );
